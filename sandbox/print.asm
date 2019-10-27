@@ -23,10 +23,10 @@ print_hex:
   call print_hex_handle_char
 
   mov ah, dl
-  call print_hex_nibble
   call print_hex_handle_char
 
   mov ah, dl
+  call print_hex_nibble
   call print_hex_handle_char
 
   mov bx, HEX_OUT
