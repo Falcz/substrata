@@ -1,13 +1,12 @@
-read_disk:
+disk_load:
   pusha
   push dx
-
 
   mov ah, 0x02                  ; BIOS read sector function
   mov al, dh                    ; Number of sectors to read
   mov ch, 0x00                  ; track number
   mov dh, 0x00                  ; head number
-  mov cl, 0x02                  ; secctor number
+  mov cl, 0x02                  ; sector number
 
   int 0x13                      ; BIOS interrupt
 

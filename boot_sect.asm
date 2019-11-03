@@ -1,14 +1,51 @@
-; Set Teletype Mode
-mov ah, 0x0e
-  
-; Write 'ok'
-mov al, 'o'
-int 0x10
-mov al, 'k'
-int 0x10
+[org 0x7c00]
+  KERNEL_OFFSET equ 0x1000
 
-; Infinite loop
-jmp $
+  mov [BOOT_DRIVE], dl
+
+  mov bp, 0x9000
+  mov sp, bp
+
+  mov bx, MSG_REAL_MODE
+  call print_string
+
+  call load_kernel
+  call switch_to_pm
+
+  jmp $
+
+%include "./scripts/disk.asm"
+%include "./scripts/gdt.asm"
+%include "./scripts/print.asm"
+%include "./scripts/protected_print.asm"
+%include "./scripts/switch_to_pm.asm"
+
+[bits 16]
+load_kernel:
+  mov bx, MSG_LOAD_KERNEL
+  call print_string
+
+  mov bx, KERNEL_OFFSET
+  mov dh, 15
+  mov dl, [BOOT_DRIVE]
+  call disk_load
+
+  ret
+
+[bits 32]
+
+BEGIN_PM:
+  mov ebx, MSG_PROT_MODE
+  call print_string_pm
+
+  call KERNEL_OFFSET
+
+  jmp $
+
+BOOT_DRIVE db 0
+MSG_REAL_MODE db "Started in 16-bit Real Mode",0
+MSG_PROT_MODE db "Switched to 32-bit Protected Mode",0
+MSG_LOAD_KERNEL db "Loading kernel into memory",0
 
 ; Padding
 times 510-($-$$) db 0

@@ -8,6 +8,7 @@ print_string_pm:
   print_string_next_char_pm:
     mov al, [ebx]
     mov ah, WHITE_ON_BLACK
+    mov [edx], ax
     add ebx, 1
     add edx, 2
     cmp al, 0
