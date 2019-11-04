@@ -14,11 +14,11 @@
 
   jmp $
 
-%include "./scripts/disk.asm"
-%include "./scripts/gdt.asm"
-%include "./scripts/print.asm"
-%include "./scripts/protected_print.asm"
-%include "./scripts/switch_to_pm.asm"
+%include "boot/disk.asm"
+%include "boot/gdt.asm"
+%include "boot/print.asm"
+%include "boot/protected_print.asm"
+%include "boot/switch_to_pm.asm"
 
 [bits 16]
 load_kernel:
