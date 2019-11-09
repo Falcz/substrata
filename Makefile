@@ -21,7 +21,8 @@ run: os-image.bin
 	qemu-system-x86_64 -fda os-image.bin
 
 debug: os-image.bin kernel.elf
-	qemu-system-x86_64 -s -fda os-image.bin &
+	qemu-system-x86_64 -s -S -fda os-image.bin &
+	sleep 1
 	${GDB} -ex "target remote localhost:1234" -ex "symbol-file kernel.elf"
 
 %.o: %.c ${HEADERS}
