@@ -1,6 +1,9 @@
 #include "screen.h"
 #include "ports.h"
 
+int get_cursor_offset();
+void set_cursor_offset(int offset);
+
 void clear_screen() {
   int screen_size = MAX_COLS * MAX_ROWS;
   char *screen = (char*) VIDEO_ADDRESS;
@@ -29,7 +32,18 @@ void kprint(char *message) {
 }
 
 void kprint_at(char *message, int col, int row) {
-  // TODO
+  if (col >= MAX_COLS) {
+    kprint("Maximum column position exceeded.");
+    return;
+  }
+  if (row >= MAX_ROWS) {
+    kprint("Maximum row position exceeded.");
+    return;
+  }
+  int offset = col * 2 + row * 2 * MAX_COLS;
+  set_cursor_offset(offset);
+
+  kprint(message);
 }
 
 int get_cursor_offset() {
@@ -48,3 +62,6 @@ void set_cursor_offset(int offset) {
   port_byte_out(REG_SCREEN_DATA, (unsigned char)(offset & 0xff));
 }
 
+void handle_scroll(int offset) {
+  
+}
