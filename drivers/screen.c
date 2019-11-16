@@ -1,5 +1,6 @@
 #include "screen.h"
 #include "ports.h"
+#include "../kernel/util.h"
 
 int get_cursor_offset();
 void set_cursor_offset(int offset);
@@ -16,6 +17,22 @@ void clear_screen() {
   set_cursor_offset(0);
 }
 
+int increment_offset(int offset) {
+  char *screen = (char*) VIDEO_ADDRESS;
+  int new_offset = offset + 2;
+  if (new_offset >= MAX_COLS * MAX_ROWS  * 2) {
+    int bottom = MAX_COLS * (MAX_ROWS - 1) * 2;
+    memory_copy(screen + MAX_COLS * 2, screen, MAX_COLS * (MAX_ROWS - 1) * 2);
+
+    for (int i = 0; i < MAX_COLS; i++) {
+      screen[bottom + i * 2] = ' ';
+      screen[bottom + i * 2 + 1] = WHITE_ON_BLACK;
+    }
+    return bottom;
+  }
+  return new_offset;
+}
+
 void kprint(char *message) {
   int offset = get_cursor_offset();
   char *screen = (char*) VIDEO_ADDRESS;
@@ -23,12 +40,13 @@ void kprint(char *message) {
   int position = 0;
 
   while (message[position] != 0) {
-    screen[offset + position * 2] = message[position];
-    screen[offset + position * 2 + 1] = WHITE_ON_BLACK;
+    screen[offset] = message[position];
+    screen[offset + 1] = WHITE_ON_BLACK;
+    offset = increment_offset(offset);
     position++;
   }
 
-  set_cursor_offset(offset + position * 2);
+  set_cursor_offset(offset);
 }
 
 void kprint_at(char *message, int col, int row) {
