@@ -40,9 +40,14 @@ void kprint(char *message) {
   int position = 0;
 
   while (message[position] != 0) {
-    screen[offset] = message[position];
-    screen[offset + 1] = WHITE_ON_BLACK;
-    offset = increment_offset(offset);
+      if (message[position] == '\n') {
+          int current_row = (offset / (MAX_COLS * 2)) + 1;
+          offset = ((MAX_COLS * current_row) - 1) * 2;
+      } else {
+          screen[offset] = message[position];
+          screen[offset + 1] = WHITE_ON_BLACK;
+      }
+      offset = increment_offset(offset);
     position++;
   }
 
