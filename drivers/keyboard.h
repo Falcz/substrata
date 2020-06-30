@@ -1,0 +1,6 @@
+#ifndef MINIMALBOOT_KEYBOARD_H
+#define MINIMALBOOT_KEYBOARD_H
+
+void init_keyboard();
+
+#endif //MINIMALBOOT_KEYBOARD_H

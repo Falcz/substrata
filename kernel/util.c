@@ -5,7 +5,8 @@ void memory_copy(char *source, char *dest, int nbytes) {
 }
 
 void int_to_ascii(int n, char str[]) {
-  int pos = 0;
+  int pos = 1;
+  str[0] = '\0';
   while (n > 0) {
     int low = n % 10;
     n /= 10;
