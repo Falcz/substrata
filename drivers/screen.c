@@ -5,13 +5,17 @@
 int get_cursor_offset();
 void set_cursor_offset(int offset);
 
+void set_char(char character, int offset) {
+    char *screen = (char*) VIDEO_ADDRESS;
+    screen[offset] = character;
+    screen[offset + 1] = WHITE_ON_BLACK;
+}
+
 void clear_screen() {
   int screen_size = MAX_COLS * MAX_ROWS;
-  char *screen = (char*) VIDEO_ADDRESS;
 
   for (int i = 0; i < screen_size; i++) {
-    screen[i * 2] = ' ';
-    screen[i * 2 + 1] = WHITE_ON_BLACK;
+    set_char(' ', i * 2);
   }
 
   set_cursor_offset(0);
@@ -25,8 +29,7 @@ int increment_offset(int offset) {
     memory_copy(screen + MAX_COLS * 2, screen, MAX_COLS * (MAX_ROWS - 1) * 2);
 
     for (int i = 0; i < MAX_COLS; i++) {
-      screen[bottom + i * 2] = ' ';
-      screen[bottom + i * 2 + 1] = WHITE_ON_BLACK;
+        set_char(' ', bottom + i * 2);
     }
     return bottom;
   }
@@ -35,7 +38,6 @@ int increment_offset(int offset) {
 
 void kprint(char *message) {
   int offset = get_cursor_offset();
-  char *screen = (char*) VIDEO_ADDRESS;
 
   int position = 0;
 
@@ -44,14 +46,19 @@ void kprint(char *message) {
           int current_row = (offset / (MAX_COLS * 2)) + 1;
           offset = ((MAX_COLS * current_row) - 1) * 2;
       } else {
-          screen[offset] = message[position];
-          screen[offset + 1] = WHITE_ON_BLACK;
+          set_char(message[position], offset);
       }
       offset = increment_offset(offset);
     position++;
   }
 
   set_cursor_offset(offset);
+}
+
+void backspace() {
+    int offset = get_cursor_offset() - 2;
+    set_cursor_offset(offset);
+    set_char(' ', offset);
 }
 
 void kprint_at(char *message, int col, int row) {
@@ -83,8 +90,4 @@ void set_cursor_offset(int offset) {
   port_byte_out(REG_SCREEN_DATA, (unsigned char)(offset >> 8));
   port_byte_out(REG_SCREEN_CTRL, 15);
   port_byte_out(REG_SCREEN_DATA, (unsigned char)(offset & 0xff));
-}
-
-void handle_scroll(int offset) {
-  
 }
