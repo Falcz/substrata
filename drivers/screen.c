@@ -1,11 +1,18 @@
 #include "screen.h"
 #include "ports.h"
-#include "../kernel/util.h"
+#include "../libc/mem.h"
 
-int get_cursor_offset();
-void set_cursor_offset(int offset);
+static const char banner[] = "\n               __         __             __                                    "
+                             "\n   _______  __/ /_  _____/ /__________ _/ /_____ _                             "
+                             "\n  / ___/ / / / __ \\/ ___/ __/ ___/ __ `/ __/ __ `/                             "
+                             "\n (__  ) /_/ / /_/ (__  ) /_/ /  / /_/ / /_/ /_/ /                              "
+                             "\n/____/\\__,_/_.___/____/\\__/_/   \\__,_/\\__/\\__,_/                               "
+                             "\n                                                                                ";
 
-void set_char(char character, int offset) {
+static int get_cursor_offset();
+static void set_cursor_offset(int offset);
+
+static void set_char(char character, int offset) {
     char *screen = (char*) VIDEO_ADDRESS;
     screen[offset] = character;
     screen[offset + 1] = WHITE_ON_BLACK;
@@ -21,7 +28,7 @@ void clear_screen() {
   set_cursor_offset(0);
 }
 
-int increment_offset(int offset) {
+static int increment_offset(int offset) {
   char *screen = (char*) VIDEO_ADDRESS;
   int new_offset = offset + 2;
   if (new_offset >= MAX_COLS * MAX_ROWS  * 2) {
@@ -55,14 +62,8 @@ void kprint(char *message) {
   set_cursor_offset(offset);
 }
 
-void backspace() {
-    int offset = get_cursor_offset() - 2;
-    set_cursor_offset(offset);
-    set_char(' ', offset);
-}
-
 void kprint_at(char *message, int col, int row) {
-  if (col >= MAX_COLS) {
+  if (col > MAX_COLS) {
     kprint("Maximum column position exceeded.");
     return;
   }
@@ -76,7 +77,13 @@ void kprint_at(char *message, int col, int row) {
   kprint(message);
 }
 
-int get_cursor_offset() {
+void kprint_backspace() {
+    int offset = get_cursor_offset() - 2;
+    set_cursor_offset(offset);
+    set_char(' ', offset);
+}
+
+static int get_cursor_offset() {
   port_byte_out(REG_SCREEN_CTRL, 14);
   int offset = port_byte_in(REG_SCREEN_DATA) << 8;
   port_byte_out(REG_SCREEN_CTRL, 15);
@@ -84,10 +91,14 @@ int get_cursor_offset() {
   return offset * 2;
 }
 
-void set_cursor_offset(int offset) {
+static void set_cursor_offset(int offset) {
   offset /= 2;
   port_byte_out(REG_SCREEN_CTRL, 14);
   port_byte_out(REG_SCREEN_DATA, (unsigned char)(offset >> 8));
   port_byte_out(REG_SCREEN_CTRL, 15);
   port_byte_out(REG_SCREEN_DATA, (unsigned char)(offset & 0xff));
+}
+
+void screen_banner() {
+    kprint((char*) banner);
 }
